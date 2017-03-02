@@ -1,3 +1,8 @@
+#include <Keypad.h>
+#include <SPI.h>
+#include <TimerOne.h>
+#include "LedControl.h"
+
 // Основная описательная часть
 //
 //
