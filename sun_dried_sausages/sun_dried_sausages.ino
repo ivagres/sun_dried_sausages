@@ -27,7 +27,7 @@
 // 	- 
 //	-
 //	-
-#define PIN_RELE 11; // Реле
+#define PIN_RELE 11 // Реле
 
 // блок работы с клавиатурой
 #define PIN_KYE_1 4
@@ -35,27 +35,256 @@
 #define PIN_KYE_3 6
 #define PIN_KYE_4 7
 
+// Блок констант
+
+// Интервалы
+const char interval_type_h = 'H';
+const char interval_type_m = 'M';
+const char interval_type_s = 'S';
 
 // тут ещё что то сделаем
 
 // Структура для определения диапазона часов, время работы, диапазон 
- 
+typedef struct wa_clock{
+  int zhour;
+  int zminute;
+  int zsecond;
+};
 
-// Функция вызываемая кажые 0,5 секунды. Проверяем работоспособность алгоритмов в ней, за одно и мегаем светодиодом.
-
+typedef struct wa_works{
+  // Диапазон времени от и до часы минуты
+  wa_clock  range_clock_low;
+  wa_clock  range_clock_high;
+  int       interval_wait;
+  char      interval_wait_type; 
+  int       interval_work;
+  char      interval_work_type;
+};
 
 // Глобальные переменные
 RTC_DS1307 rtc;
 const int DelayPWM = 1000000 / 2;
 int NumberProgramm = 0;
 
+DateTime gTime;
 
-void timerIsr(){
-  // тут изменить можно глобальные переменные и все что нам нужно на работу вне основной программе  
+// Определяем для каждой программы массив для работы (в будующем попробуем настроить её на работу по настройке, а пока так жестко)
+int gCountProgramRange[3]={5,3,3};
+
+wa_works lt_works_prog1[5];
+wa_works lt_works_prog2[3];
+wa_works lt_works_prog3[3];
+
+void init_valume_programm(){
+  // Для программы 1
+  // ============================================
+  lt_works_prog1[0].range_clock_low.zhour   = 7;
+  lt_works_prog1[0].range_clock_low.zminute = 0;
+  lt_works_prog1[0].range_clock_low.zsecond = 0;
+
+  lt_works_prog1[0].range_clock_high.zhour   = 9;
+  lt_works_prog1[0].range_clock_high.zminute = 0;
+  lt_works_prog1[0].range_clock_high.zsecond = 0;
+  
+  lt_works_prog1[0].interval_wait       = 10;
+  lt_works_prog1[0].interval_wait_type  = interval_type_m;
+  lt_works_prog1[0].interval_work       = 5;
+  lt_works_prog1[0].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog1[1].range_clock_low.zhour   = 9;
+  lt_works_prog1[1].range_clock_low.zminute = 0;
+  lt_works_prog1[1].range_clock_low.zsecond = 0;
+
+  lt_works_prog1[1].range_clock_high.zhour   = 11;
+  lt_works_prog1[1].range_clock_high.zminute = 0;
+  lt_works_prog1[1].range_clock_high.zsecond = 0;
+  
+  lt_works_prog1[1].interval_wait       = 7;
+  lt_works_prog1[1].interval_wait_type  = interval_type_m;
+  lt_works_prog1[1].interval_work       = 5;
+  lt_works_prog1[1].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog1[2].range_clock_low.zhour   = 11;
+  lt_works_prog1[2].range_clock_low.zminute = 0;
+  lt_works_prog1[2].range_clock_low.zsecond = 0;
+
+  lt_works_prog1[2].range_clock_high.zhour   = 15;
+  lt_works_prog1[2].range_clock_high.zminute = 0;
+  lt_works_prog1[2].range_clock_high.zsecond = 0;
+  
+  lt_works_prog1[2].interval_wait       = 5;
+  lt_works_prog1[2].interval_wait_type  = interval_type_m;
+  lt_works_prog1[2].interval_work       = 5;
+  lt_works_prog1[2].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog1[3].range_clock_low.zhour   = 15;
+  lt_works_prog1[3].range_clock_low.zminute = 0;
+  lt_works_prog1[3].range_clock_low.zsecond = 0;
+
+  lt_works_prog1[3].range_clock_high.zhour   = 17;
+  lt_works_prog1[3].range_clock_high.zminute = 0;
+  lt_works_prog1[3].range_clock_high.zsecond = 0;
+  
+  lt_works_prog1[3].interval_wait       = 7;
+  lt_works_prog1[3].interval_wait_type  = interval_type_m;
+  lt_works_prog1[3].interval_work       = 5;
+  lt_works_prog1[3].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog1[4].range_clock_low.zhour   = 17;
+  lt_works_prog1[4].range_clock_low.zminute = 0;
+  lt_works_prog1[4].range_clock_low.zsecond = 0;
+
+  lt_works_prog1[4].range_clock_high.zhour   = 20;
+  lt_works_prog1[4].range_clock_high.zminute = 0;
+  lt_works_prog1[4].range_clock_high.zsecond = 0;
+  
+  lt_works_prog1[4].interval_wait       = 10;
+  lt_works_prog1[4].interval_wait_type  = interval_type_m;
+  lt_works_prog1[4].interval_work       = 5;
+  lt_works_prog1[4].interval_work_type  = interval_type_s;
+
+  // +++++++++++++++++++++++++++++++++++++++++++
+  // Для программы 2
+  // ============================================
+  lt_works_prog2[0].range_clock_low.zhour   = 7;
+  lt_works_prog2[0].range_clock_low.zminute = 0;
+  lt_works_prog2[0].range_clock_low.zsecond = 0;
+
+  lt_works_prog2[0].range_clock_high.zhour   = 12;
+  lt_works_prog2[0].range_clock_high.zminute = 0;
+  lt_works_prog2[0].range_clock_high.zsecond = 0;
+  
+  lt_works_prog2[0].interval_wait       = 15;
+  lt_works_prog2[0].interval_wait_type  = interval_type_m;
+  lt_works_prog2[0].interval_work       = 5;
+  lt_works_prog2[0].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog2[1].range_clock_low.zhour   = 12;
+  lt_works_prog2[1].range_clock_low.zminute = 0;
+  lt_works_prog2[1].range_clock_low.zsecond = 0;
+
+  lt_works_prog2[1].range_clock_high.zhour   = 17;
+  lt_works_prog2[1].range_clock_high.zminute = 0;
+  lt_works_prog2[1].range_clock_high.zsecond = 0;
+  
+  lt_works_prog2[1].interval_wait       = 10;
+  lt_works_prog2[1].interval_wait_type  = interval_type_m;
+  lt_works_prog2[1].interval_work       = 5;
+  lt_works_prog2[1].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog2[2].range_clock_low.zhour   = 17;
+  lt_works_prog2[2].range_clock_low.zminute = 0;
+  lt_works_prog2[2].range_clock_low.zsecond = 0;
+
+  lt_works_prog2[2].range_clock_high.zhour   = 20;
+  lt_works_prog2[2].range_clock_high.zminute = 0;
+  lt_works_prog2[2].range_clock_high.zsecond = 0;
+  
+  lt_works_prog2[2].interval_wait       = 15;
+  lt_works_prog2[2].interval_wait_type  = interval_type_m;
+  lt_works_prog2[2].interval_work       = 5;
+  lt_works_prog2[2].interval_work_type  = interval_type_s;
+
+  // +++++++++++++++++++++++++++++++++++++++++++
+  // Для программы 3
+  // ============================================
+  lt_works_prog3[0].range_clock_low.zhour   = 7;
+  lt_works_prog3[0].range_clock_low.zminute = 0;
+  lt_works_prog3[0].range_clock_low.zsecond = 0;
+
+  lt_works_prog3[0].range_clock_high.zhour   = 12;
+  lt_works_prog3[0].range_clock_high.zminute = 0;
+  lt_works_prog3[0].range_clock_high.zsecond = 0;
+  
+  lt_works_prog3[0].interval_wait       = 20;
+  lt_works_prog3[0].interval_wait_type  = interval_type_m;
+  lt_works_prog3[0].interval_work       = 5;
+  lt_works_prog3[0].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog3[1].range_clock_low.zhour   = 7;
+  lt_works_prog3[1].range_clock_low.zminute = 0;
+  lt_works_prog3[1].range_clock_low.zsecond = 0;
+
+  lt_works_prog3[1].range_clock_high.zhour   = 12;
+  lt_works_prog3[1].range_clock_high.zminute = 0;
+  lt_works_prog3[1].range_clock_high.zsecond = 0;
+  
+  lt_works_prog3[1].interval_wait       = 15;
+  lt_works_prog3[1].interval_wait_type  = interval_type_m;
+  lt_works_prog3[1].interval_work       = 5;
+  lt_works_prog3[1].interval_work_type  = interval_type_s;
+
+  // ============================================
+  lt_works_prog3[2].range_clock_low.zhour   = 7;
+  lt_works_prog3[2].range_clock_low.zminute = 0;
+  lt_works_prog3[2].range_clock_low.zsecond = 0;
+
+  lt_works_prog3[2].range_clock_high.zhour   = 12;
+  lt_works_prog3[2].range_clock_high.zminute = 0;
+  lt_works_prog3[2].range_clock_high.zsecond = 0;
+  
+  lt_works_prog3[2].interval_wait       = 20;
+  lt_works_prog3[2].interval_wait_type  = interval_type_m;
+  lt_works_prog3[2].interval_work       = 5;
+  lt_works_prog3[2].interval_work_type  = interval_type_s;
   
 }
 
+// Функция вызываемая кажые 0,5 секунды. Проверяем работоспособность алгоритмов в ней, за одно и мегаем светодиодом.
+void timerIsr(){
+  // тут изменить можно глобальные переменные и все что нам нужно на работу вне основной программе  
+  
+  // поделим время на состовляющие
+  int p_hour    = gTime.hour();
+  int p_minute  = gTime.minute();
+  int p_second  = gTime.second();
+  
+  // Прочтем номер программы и узнаем что нам делать
+  // во первых проверим по номеру программы на дипазон времени
+  // во вторых проверим совпадает ли временные интервалы при котором должно все работать, Должна быть переменная которая учитывает интервалы
+  int iNumberProgramm = 0;
+  iNumberProgramm = NumberProgramm;
+  if ( NumberProgramm == 4 ){
+      // Получим номер оптимальной программы для выполнения
+  }
+  
+
+  wa_works it_works_prog[gCountProgramRange[(iNumberProgramm - 1)]];
+  
+  switch (iNumberProgramm){
+    case 1:
+      for (int i = 0; i < gCountProgramRange[(iNumberProgramm - 1)]; i++) {
+        it_works_prog[i] = lt_works_prog1[i];
+      }
+      break;
+    case 2:
+      for (int i = 0; i < gCountProgramRange[(iNumberProgramm - 1)]; i++) {
+        it_works_prog[i] = lt_works_prog2[i];
+      }
+      break;
+    case 3:
+      for (int i = 0; i < gCountProgramRange[(iNumberProgramm - 1)]; i++) {
+        it_works_prog[i] = lt_works_prog3[i];
+      }
+      break;
+    default:
+      break;
+  }
+ 
+
+}
+
 void setup() {
+  // Установим значения для работы начальный (так сказать заводские :) )
+  init_valume_programm();
+  
   // Установка pin для реле срабатывания
   pinMode(PIN_RELE,OUTPUT);
 
@@ -66,6 +295,7 @@ void setup() {
 
   if (! rtc.isrunning()) {
     //RTC не запустился значит ошибка, работа не возможна
+    
   }
 
 // Установка PWM
@@ -82,14 +312,12 @@ void setup() {
 
 void loop() {
   // Блок статических переменных для управления временем
-  static DateTime iTime;
   static int TimeProgramOld = 0;
-
+  
   // Статические переменные по номеру нажатой кнопки
-  static 
   
   // Получаем время с часов 
-  iTime = rtc.now();
+  gTime = rtc.now();
 
   // обработка нажатии на клавиатуру и меняем прогрумму
   if ( digitalRead(PIN_KYE_1) == LOW ){
