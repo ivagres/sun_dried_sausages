@@ -42,6 +42,11 @@ const char interval_type_h = 'H';
 const char interval_type_m = 'M';
 const char interval_type_s = 'S';
 
+const char range_type_hhh  = "HHH";
+const char range_type_hmm  = "HMM";
+const char range_type_hms  = "HMS";
+
+
 // тут ещё что то сделаем
 
 // Структура для определения диапазона часов, время работы, диапазон 
@@ -55,16 +60,29 @@ typedef struct wa_works{
   // Диапазон времени от и до часы минуты
   wa_clock  range_clock_low;
   wa_clock  range_clock_high;
+  char      range_type;
   int       interval_wait;
   char      interval_wait_type; 
   int       interval_work;
   char      interval_work_type;
 };
 
+typedef struct wa_work_programm{
+  bool  is_work;
+  int   timer;
+  char  type_timer;
+  int   range;
+  char  type_range;
+  bool  event_timer;
+  
+};
+
 // Глобальные переменные
 RTC_DS1307 rtc;
 const int DelayPWM = 1000000 / 2;
 int NumberProgramm = 0;
+
+wa_work_programm g_ls_work_programm;
 
 DateTime gTime;
 
@@ -85,7 +103,9 @@ void init_valume_programm(){
   lt_works_prog1[0].range_clock_high.zhour   = 9;
   lt_works_prog1[0].range_clock_high.zminute = 0;
   lt_works_prog1[0].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog1[0].range_type = range_type_hmm;
+
   lt_works_prog1[0].interval_wait       = 10;
   lt_works_prog1[0].interval_wait_type  = interval_type_m;
   lt_works_prog1[0].interval_work       = 5;
@@ -99,7 +119,9 @@ void init_valume_programm(){
   lt_works_prog1[1].range_clock_high.zhour   = 11;
   lt_works_prog1[1].range_clock_high.zminute = 0;
   lt_works_prog1[1].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog1[1].range_type = range_type_hmm;
+
   lt_works_prog1[1].interval_wait       = 7;
   lt_works_prog1[1].interval_wait_type  = interval_type_m;
   lt_works_prog1[1].interval_work       = 5;
@@ -113,7 +135,9 @@ void init_valume_programm(){
   lt_works_prog1[2].range_clock_high.zhour   = 15;
   lt_works_prog1[2].range_clock_high.zminute = 0;
   lt_works_prog1[2].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog1[2].range_type = range_type_hmm;
+
   lt_works_prog1[2].interval_wait       = 5;
   lt_works_prog1[2].interval_wait_type  = interval_type_m;
   lt_works_prog1[2].interval_work       = 5;
@@ -127,7 +151,9 @@ void init_valume_programm(){
   lt_works_prog1[3].range_clock_high.zhour   = 17;
   lt_works_prog1[3].range_clock_high.zminute = 0;
   lt_works_prog1[3].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog1[3].range_type = range_type_hmm;
+
   lt_works_prog1[3].interval_wait       = 7;
   lt_works_prog1[3].interval_wait_type  = interval_type_m;
   lt_works_prog1[3].interval_work       = 5;
@@ -141,7 +167,9 @@ void init_valume_programm(){
   lt_works_prog1[4].range_clock_high.zhour   = 20;
   lt_works_prog1[4].range_clock_high.zminute = 0;
   lt_works_prog1[4].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog1[4].range_type = range_type_hmm;
+
   lt_works_prog1[4].interval_wait       = 10;
   lt_works_prog1[4].interval_wait_type  = interval_type_m;
   lt_works_prog1[4].interval_work       = 5;
@@ -157,7 +185,9 @@ void init_valume_programm(){
   lt_works_prog2[0].range_clock_high.zhour   = 12;
   lt_works_prog2[0].range_clock_high.zminute = 0;
   lt_works_prog2[0].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog2[0].range_type = range_type_hmm;
+
   lt_works_prog2[0].interval_wait       = 15;
   lt_works_prog2[0].interval_wait_type  = interval_type_m;
   lt_works_prog2[0].interval_work       = 5;
@@ -171,7 +201,9 @@ void init_valume_programm(){
   lt_works_prog2[1].range_clock_high.zhour   = 17;
   lt_works_prog2[1].range_clock_high.zminute = 0;
   lt_works_prog2[1].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog2[1].range_type = range_type_hmm;
+
   lt_works_prog2[1].interval_wait       = 10;
   lt_works_prog2[1].interval_wait_type  = interval_type_m;
   lt_works_prog2[1].interval_work       = 5;
@@ -185,7 +217,9 @@ void init_valume_programm(){
   lt_works_prog2[2].range_clock_high.zhour   = 20;
   lt_works_prog2[2].range_clock_high.zminute = 0;
   lt_works_prog2[2].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog2[2].range_type = range_type_hmm;
+
   lt_works_prog2[2].interval_wait       = 15;
   lt_works_prog2[2].interval_wait_type  = interval_type_m;
   lt_works_prog2[2].interval_work       = 5;
@@ -201,7 +235,9 @@ void init_valume_programm(){
   lt_works_prog3[0].range_clock_high.zhour   = 12;
   lt_works_prog3[0].range_clock_high.zminute = 0;
   lt_works_prog3[0].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog3[0].range_type = range_type_hmm;
+
   lt_works_prog3[0].interval_wait       = 20;
   lt_works_prog3[0].interval_wait_type  = interval_type_m;
   lt_works_prog3[0].interval_work       = 5;
@@ -215,7 +251,9 @@ void init_valume_programm(){
   lt_works_prog3[1].range_clock_high.zhour   = 12;
   lt_works_prog3[1].range_clock_high.zminute = 0;
   lt_works_prog3[1].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog3[1].range_type = range_type_hmm;
+
   lt_works_prog3[1].interval_wait       = 15;
   lt_works_prog3[1].interval_wait_type  = interval_type_m;
   lt_works_prog3[1].interval_work       = 5;
@@ -229,7 +267,9 @@ void init_valume_programm(){
   lt_works_prog3[2].range_clock_high.zhour   = 12;
   lt_works_prog3[2].range_clock_high.zminute = 0;
   lt_works_prog3[2].range_clock_high.zsecond = 0;
-  
+
+  lt_works_prog3[2].range_type = range_type_hmm;
+
   lt_works_prog3[2].interval_wait       = 20;
   lt_works_prog3[2].interval_wait_type  = interval_type_m;
   lt_works_prog3[2].interval_work       = 5;
@@ -277,7 +317,46 @@ void timerIsr(){
     default:
       break;
   }
+
+ // Тут будем бегать по циклу и проверять что у нас есть
+ // Нужны переменные по таймеру! Путь это будет gTimeWork - это структура со свойствами
  
+ // Вспомогательные переменные
+  wa_works  ls_works;
+  bool      is_work = false;
+  
+ // Пробежимся по циклу и посмотрим в каком диапазоне мы сейчас, и если у нас он есть то смотрим по стотянию что бы должны делать будем
+   for (int i = 0; i < gCountProgramRange[(iNumberProgramm - 1)]; i++) {
+        ls_works = it_works_prog[i];
+
+        // 
+        
+        if ( p_hour >= ls_works.range_clock_low.zhour and p_hour <= ls_works.range_clock_high.zhour ){
+          
+        }
+        //g_ls_work_programm
+   }
+
+
+  ls_works.range_clock_low.zhour   = 7;
+  ls_works.range_clock_low.zminute = 0;
+  ls_works.range_clock_low.zsecond = 0;
+  ls_works.range_clock_high.zhour   = 12;
+  ls_works.range_clock_high.zminute = 0;
+  ls_works.range_clock_high.zsecond = 0;
+  ls_works.interval_wait       = 20;
+  ls_works.interval_wait_type  = interval_type_m;
+  ls_works.interval_work       = 5;
+  ls_works.interval_work_type  = interval_type_s;
+
+
+
+
+
+
+
+
+
 
 }
 
