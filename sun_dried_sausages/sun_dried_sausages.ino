@@ -504,7 +504,9 @@ void timerIsr(void) {
   wa_works  ls_works;
 
   bool is_range = false;
-
+  
+  is_range = false;
+  
   // Пробежимся по циклу и посмотрим в каком диапазоне мы сейчас, и если у нас он есть то смотрим по стотянию что бы должны делать будем
   for ( int i = 0; i < gCountProgramRange[(iNumberProgramm - 1)]; i++ ) {
     ls_works = it_works_prog[i];
@@ -536,7 +538,10 @@ void timerIsr(void) {
     if (is_range) break;
   }
 
+  
+  
   if (is_range) {
+
     static int kof_work = 1;
     static int kof_wait = 1;
 
@@ -583,14 +588,14 @@ void timerIsr(void) {
         g_ls_work_programm.work = g_ls_work_programm.work - 1 ;
         if (!g_ls_work_programm.is_rele) {
           g_ls_work_programm.is_rele    = true;
-          digitalWrite(PIN_RELE, HIGH);
+          digitalWrite(PIN_RELE, LOW);
         }
       } else if (g_ls_work_programm.wait > 0) {
         Serial.println(g_ls_work_programm.wait);
         g_ls_work_programm.wait = g_ls_work_programm.wait - 1;
         if (g_ls_work_programm.is_rele) {
           g_ls_work_programm.is_rele    = false;
-          digitalWrite(PIN_RELE, LOW);
+          digitalWrite(PIN_RELE, HIGH);
         }
       } else {
         g_ls_work_programm.work         = ls_works.interval_work * factor * kof_work;
@@ -608,7 +613,7 @@ void timerIsr(void) {
     if (g_ls_work_programm.is_rele) {
       print_time(true);
       g_ls_work_programm.is_rele    = false;
-      digitalWrite(PIN_RELE, LOW);
+      digitalWrite(PIN_RELE, HIGH);
     }
   }
 
@@ -721,7 +726,7 @@ void loop() {
 
     if (g_ls_work_programm.is_rele) {
       g_ls_work_programm.is_rele    = false;
-      digitalWrite(PIN_RELE, LOW);
+      digitalWrite(PIN_RELE, HIGH);
     }
     print_time(true);
   }
