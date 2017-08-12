@@ -192,11 +192,11 @@ void init_valume_programm() {
   lt_works_prog1[4].range_clock_low.zminute = 0;
   lt_works_prog1[4].range_clock_low.zsecond = 0;
 
-  lt_works_prog1[4].range_clock_high.zhour   = 20;
-  lt_works_prog1[4].range_clock_high.zminute = 0;
+  lt_works_prog1[4].range_clock_high.zhour   = 19;
+  lt_works_prog1[4].range_clock_high.zminute = 59;
   lt_works_prog1[4].range_clock_high.zsecond = 0;
 
-  lt_works_prog1[4].range_type = range_type_hhh;
+  lt_works_prog1[4].range_type = range_type_hmm;
 
   lt_works_prog1[4].interval_wait       = 10;
   lt_works_prog1[4].interval_wait_type  = interval_type_m;
@@ -588,14 +588,14 @@ void timerIsr(void) {
         g_ls_work_programm.work = g_ls_work_programm.work - 1 ;
         if (!g_ls_work_programm.is_rele) {
           g_ls_work_programm.is_rele    = true;
-          digitalWrite(PIN_RELE, LOW);
+          digitalWrite(PIN_RELE, HIGH);
         }
       } else if (g_ls_work_programm.wait > 0) {
         Serial.println(g_ls_work_programm.wait);
         g_ls_work_programm.wait = g_ls_work_programm.wait - 1;
         if (g_ls_work_programm.is_rele) {
           g_ls_work_programm.is_rele    = false;
-          digitalWrite(PIN_RELE, HIGH);
+          digitalWrite(PIN_RELE, LOW);
         }
       } else {
         g_ls_work_programm.work         = ls_works.interval_work * factor * kof_work;
@@ -613,7 +613,7 @@ void timerIsr(void) {
     if (g_ls_work_programm.is_rele) {
       print_time(true);
       g_ls_work_programm.is_rele    = false;
-      digitalWrite(PIN_RELE, HIGH);
+      digitalWrite(PIN_RELE, LOW);
     }
   }
 
@@ -664,7 +664,7 @@ void setup() {
 
   // установка дисплеев
   gLC.shutdown(0, false);  // Включение дисплея
-  gLC.setIntensity(0, 2);  // Установка уровня яркости (0 - минимальное, 15 - максимальное)
+  gLC.setIntensity(0, 15);  // Установка уровня яркости (0 - минимальное, 15 - максимальное)
   gLC.clearDisplay(0);     // Очистить дисплей
 
   // Инициализация при включении программы, переменная отвечающая за работу реле и остального при об
@@ -726,7 +726,7 @@ void loop() {
 
     if (g_ls_work_programm.is_rele) {
       g_ls_work_programm.is_rele    = false;
-      digitalWrite(PIN_RELE, HIGH);
+      digitalWrite(PIN_RELE, LOW);
     }
     print_time(true);
   }
